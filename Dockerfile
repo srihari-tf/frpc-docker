@@ -1,19 +1,24 @@
-FROM alpine:3.8
+FROM alpine
 
-WORKDIR /
+LABEL maintainer="wangjun <traceflight@outlook.com>"
+
+ARG TZ='Asia/Shanghai'
+
+ENV TZ ${TZ}
 ENV FRP_VERSION 0.49.0
+ENV FRP_DOWNLOAD_URL https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_amd64.tar.gz
+RUN apk upgrade --update \
+    && apk add bash tzdata curl \
+    && curl -sSLO ${FRP_DOWNLOAD_URL} \
+    && tar -zxvf frp_${FRP_VERSION}_linux_amd64.tar.gz \
+    && mkdir /etc/frp \
+    && mv frp_${FRP_VERSION}_linux_amd64/frpc.ini /etc/frp \
+    && mv frp_${FRP_VERSION}_linux_amd64/frpc /usr/bin \
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo "${TZ}" > /etc/timezone \
+    && apk del curl \
+    && rm -rf frp_${FRP_VERSION}_linux_amd64.tar.gz \
+        frp_${FRP_VERSION}_linux_amd64 \
+        /var/cache/apk/*
 
-RUN set -x && \
-	wget --no-check-certificate https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_amd64.tar.gz && \ 
-	tar xzf frp_${FRP_VERSION}_linux_amd64.tar.gz && \
-	cd frp_${FRP_VERSION}_linux_amd64 && \
-	mkdir /frp && \
-	mv frpc /frpc && \
-    mv frpc.ini /frp/frpc.ini && \
-	cd .. && \
-	rm -rf *.tar.gz && \
-	rm -rf frp_${FRP_VERSION}_linux_amd64
-
-VOLUME /frp
-
-CMD /frpc -c /frp/frpc.ini
+CMD ["frpc","-c","/etc/frp/frpc.ini"]
