@@ -1,7 +1,7 @@
 FROM alpine:3.8
 
 WORKDIR /
-ENV FRP_VERSION 0.26.0
+ENV FRP_VERSION 0.49.0
 
 RUN set -x && \
 	wget --no-check-certificate https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_amd64.tar.gz && \ 
